@@ -1,0 +1,6 @@
+{
+  "name": "Marketing Collaboration Hub",
+  "description": "Real-time collaborative marketing hub for Offline, Online, and Graphic teams with live Firebase sync, task boards, campaign tracking, and shared asset library.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
