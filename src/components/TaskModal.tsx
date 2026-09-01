@@ -13,9 +13,15 @@ import {
   Tag, 
   Layers,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Tv,
+  Share2,
+  Printer,
+  Compass,
+  CheckCircle2,
+  FileText
 } from 'lucide-react';
-import { TaskItem, TeamRole, TaskStatus, TaskPriority, TeamMember } from '../types';
+import { TaskItem, TeamRole, TaskStatus, TaskPriority, TeamMember, MarketingJobType } from '../types';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -26,6 +32,31 @@ interface TaskModalProps {
   defaultRole?: TeamRole;
   members?: TeamMember[];
 }
+
+export const MARKETING_JOB_TYPES: { id: string; label: string; icon: string; category: string }[] = [
+  // 🎨 Graphic & Creative Job Types
+  { id: 'graphic_keyvisual', label: 'กราฟิก Key Visual, Banner & โปสเตอร์ (Key Visual & Artwork)', icon: '🎨', category: 'Graphic / Design' },
+  { id: 'motion_video', label: 'วิดีโอ & โมชันกราฟิก (Motion Graphic & Short Video)', icon: '🎬', category: 'Graphic / Motion' },
+  { id: 'packaging_dieline', label: 'บรรจุภัณฑ์ & งานไดคัท (Packaging & Dieline Sticker)', icon: '📦', category: 'Graphic / Packaging' },
+  { id: 'brand_ci_design', label: 'โลโก้, CI & Design System (Brand Identity & Guidelines)', icon: '✨', category: 'Graphic / CI' },
+  { id: 'spatial_3d_design', label: '3D Render & ออกแบบโครงสร้างบูธ (3D Spatial & Booth Design)', icon: '🏛️', category: 'Graphic / 3D' },
+  
+  // 🏢 Offline & Event Job Types
+  { id: 'posm_print', label: 'สื่อหน้าร้าน & งานพิมพ์ (POSM, Standee, Brochure)', icon: '🖨️', category: 'POSM / งานพิมพ์' },
+  { id: 'event_booth', label: 'งานอีเวนต์ & บูธกิจกรรม (Event, Booth & Roadshow)', icon: '🎪', category: 'อีเวนต์ / บูธ' },
+  { id: 'ooh_billboard', label: 'ป้ายบิลบอร์ด & สื่อนอกบ้าน (OOH / LED / Transit)', icon: '🏙️', category: 'สื่อนอกบ้าน OOH' },
+
+  // 🌐 Online & Digital Job Types
+  { id: 'digital_ads', label: 'สื่อโฆษณาออนไลน์ (Meta, Google, TikTok Ads)', icon: '📱', category: 'ยิงแอดออนไลน์' },
+  { id: 'kol_influencer', label: 'KOL & อินฟลูเอนเซอร์ (Influencer Review & PR)', icon: '🌟', category: 'KOL / PR' },
+  { id: 'content_social', label: 'คอนเทนต์ & โซเชียลมีเดีย (Content, Video, SEO)', icon: '✍️', category: 'Content / Social' },
+  { id: 'live_commerce', label: 'ไลฟ์สด & Live Streaming (TikTok Shop / Shopee)', icon: '🔴', category: 'Live Streaming' },
+
+  // 🔄 Marketing Campaigns & Mixed Types
+  { id: 'promotion_crm', label: 'กิจกรรมโปรโมชั่น & CRM (Promotion, Loyalty)', icon: '🎁', category: 'โปรโมชั่น / CRM' },
+  { id: 'omnichannel', label: 'แคมเปญผสมผสาน O2O (Online-to-Offline Marketing)', icon: '🔄', category: 'O2O / ผสมผสาน' },
+  { id: 'other', label: 'อื่นๆ (Custom Marketing Deliverable)', icon: '📌', category: 'อื่นๆ' },
+];
 
 export const TaskModal: React.FC<TaskModalProps> = ({
   isOpen,
@@ -39,6 +70,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [role, setRole] = useState<'offline' | 'online' | 'graphic'>('offline');
+  const [jobType, setJobType] = useState<string>('posm_print');
   const [status, setStatus] = useState<TaskStatus>('todo');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [assigneeName, setAssigneeName] = useState('');
@@ -47,19 +79,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [spent, setSpent] = useState<number | ''>('');
   const [tagsInput, setTagsInput] = useState('');
 
+  // Shared specs for Offline & Online & Graphic
+  const [platform, setPlatform] = useState<string>('Meta Ads');
+  const [targetKpi, setTargetKpi] = useState('');
+  const [eventLocation, setEventLocation] = useState('');
+  const [printSpecs, setPrintSpecs] = useState('');
+  const [driveUrl, setDriveUrl] = useState('');
+
   // Graphic specifics
   const [version, setVersion] = useState('v1.0 (Draft)');
   const [figmaUrl, setFigmaUrl] = useState('');
-  const [driveUrl, setDriveUrl] = useState('');
   const [reviewNotes, setReviewNotes] = useState('');
-
-  // Offline specifics
-  const [eventLocation, setEventLocation] = useState('');
-  const [printSpecs, setPrintSpecs] = useState('');
-
-  // Online specifics
-  const [platform, setPlatform] = useState<'Meta Ads' | 'Google Ads' | 'TikTok Ads' | 'SEO/Blog' | 'KOL/Influencer' | 'Email' | 'Other'>('Meta Ads');
-  const [targetKpi, setTargetKpi] = useState('');
 
   const defaultAssignee = members.length > 0 ? members[0].name : 'ทีมการตลาด';
 
@@ -68,6 +98,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setTitle(task.title);
       setDescription(task.description || '');
       setRole(task.role);
+      setJobType(task.jobType || (task.role === 'offline' ? 'posm_print' : task.role === 'online' ? 'digital_ads' : 'digital_ads'));
       setStatus(task.status);
       setPriority(task.priority);
       setAssigneeName(task.assignee?.name || defaultAssignee);
@@ -76,24 +107,24 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setSpent(task.spent !== undefined ? task.spent : '');
       setTagsInput(task.tags ? task.tags.join(', ') : '');
 
+      // Shared specs
+      setPlatform(task.platform || 'Meta Ads');
+      setTargetKpi(task.targetKpi || '');
+      setEventLocation(task.eventLocation || '');
+      setPrintSpecs(task.printSpecs || '');
+      setDriveUrl(task.driveUrl || '');
+
       // Graphic
       setVersion(task.version || 'v1.0 (Draft)');
       setFigmaUrl(task.figmaUrl || '');
-      setDriveUrl(task.driveUrl || '');
       setReviewNotes(task.reviewNotes || '');
-
-      // Offline
-      setEventLocation(task.eventLocation || '');
-      setPrintSpecs(task.printSpecs || '');
-
-      // Online
-      setPlatform(task.platform || 'Meta Ads');
-      setTargetKpi(task.targetKpi || '');
     } else {
       // Default reset
       setTitle('');
       setDescription('');
-      setRole(defaultRole === 'all' ? 'offline' : defaultRole);
+      const initialRole = defaultRole === 'all' ? 'offline' : defaultRole;
+      setRole(initialRole);
+      setJobType(initialRole === 'offline' ? 'posm_print' : initialRole === 'online' ? 'digital_ads' : 'graphic_keyvisual');
       setStatus('todo');
       setPriority('medium');
       setAssigneeName(defaultAssignee);
@@ -101,14 +132,18 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setBudget('');
       setSpent('');
       setTagsInput('');
-      setVersion('v1.0 (Draft)');
-      setFigmaUrl('');
-      setDriveUrl('');
-      setReviewNotes('');
+      
+      // Shared specs reset
+      setPlatform(initialRole === 'offline' ? 'Store/Branch' : initialRole === 'online' ? 'Meta Ads' : 'Meta Ads');
+      setTargetKpi('');
       setEventLocation('');
       setPrintSpecs('');
-      setPlatform('Meta Ads');
-      setTargetKpi('');
+      setDriveUrl('');
+
+      // Graphic reset
+      setVersion('v1.0 (Draft)');
+      setFigmaUrl('');
+      setReviewNotes('');
     }
   }, [task, defaultRole, isOpen, defaultAssignee]);
 
@@ -129,31 +164,46 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       roleTitle: 'Team Member',
     };
 
+    const chosenJobTypeObj = MARKETING_JOB_TYPES.find(j => j.id === jobType);
+
     const tags = tagsInput
       .split(',')
       .map(t => t.trim())
       .filter(Boolean);
+
+    // If no tags, default to role and job category
+    if (tags.length === 0) {
+      tags.push(role.toUpperCase());
+      if (chosenJobTypeObj) tags.push(chosenJobTypeObj.category.split('/')[0].trim());
+    }
 
     const updatedTask: TaskItem = {
       id: task ? task.id : 'task-' + Date.now(),
       title: title.trim(),
       description: description.trim(),
       role,
+      jobType,
+      jobTypeLabel: chosenJobTypeObj ? chosenJobTypeObj.label : undefined,
       status,
       priority,
       assignee: assigneeObj,
       dueDate,
       budget: budget === '' ? 0 : Number(budget),
       spent: spent === '' ? 0 : Number(spent),
-      tags: tags.length > 0 ? tags : [role.toUpperCase()],
+      tags,
+      
+      // Shared specs across Offline & Online & Graphic
+      platform: platform || undefined,
+      targetKpi: targetKpi.trim() || undefined,
+      eventLocation: eventLocation.trim() || undefined,
+      printSpecs: printSpecs.trim() || undefined,
+      driveUrl: driveUrl.trim() || undefined,
+
+      // Graphic specifics
       version: role === 'graphic' ? version : undefined,
       figmaUrl: role === 'graphic' && figmaUrl ? figmaUrl : undefined,
-      driveUrl: (role === 'graphic' || role === 'offline') && driveUrl ? driveUrl : undefined,
       reviewNotes: role === 'graphic' ? reviewNotes : undefined,
-      eventLocation: role === 'offline' ? eventLocation : undefined,
-      printSpecs: role === 'offline' ? printSpecs : undefined,
-      platform: role === 'online' ? platform : undefined,
-      targetKpi: role === 'online' ? targetKpi : undefined,
+
       createdAt: task ? task.createdAt : Date.now(),
       updatedAt: Date.now(),
       updatedBy: assigneeObj.name,
@@ -163,6 +213,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     onClose();
   };
 
+  const selectedJobTypeObj = MARKETING_JOB_TYPES.find(j => j.id === jobType);
+
   return (
     <div className="fixed inset-0 z-50 bg-[#3D4034]/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-[#FDFCF7] border border-[#E8E2D2] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
@@ -170,21 +222,28 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-[#E8E2D2] flex items-center justify-between bg-white">
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-              role === 'offline' ? 'bg-[#EDF3EB] text-[#2D5A34]' :
-              role === 'online' ? 'bg-[#FEF8E7] text-[#8C6514]' :
-              'bg-[#FDF0EB] text-[#C85A32]'
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shadow-xs ${
+              role === 'offline' ? 'bg-[#EDF3EB] text-[#2D5A34] border border-[#D0DEC9]' :
+              role === 'online' ? 'bg-[#FEF8E7] text-[#8C6514] border border-[#EEDFB4]' :
+              'bg-[#FDF0EB] text-[#C85A32] border border-[#F5D0C5]'
             }`}>
-              {role === 'offline' && <MapPin className="w-4 h-4" />}
-              {role === 'online' && <Globe className="w-4 h-4" />}
-              {role === 'graphic' && <Palette className="w-4 h-4" />}
+              {selectedJobTypeObj?.icon || (role === 'offline' ? '🎪' : role === 'online' ? '📱' : '🎨')}
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#344E41]">
-                {task ? 'แก้ไขข้อมูลงาน / บรีฟ' : 'สร้างงานใหม่ / บรีฟงานการตลาด'}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#344E41]">
+                  {task ? 'แก้ไขข้อมูลงาน / บรีฟ' : 'สร้างงานใหม่ / บรีฟการตลาด'}
+                </h3>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                  role === 'offline' ? 'bg-[#EDF3EB] text-[#2D5A34] border border-[#C5DCB7]' :
+                  role === 'online' ? 'bg-[#FEF8E7] text-[#8C6514] border border-[#EEDFB4]' :
+                  'bg-[#FDF0EB] text-[#C85A32] border border-[#F5D0C5]'
+                }`}>
+                  หน้าที่หลัก: {role.toUpperCase()}
+                </span>
+              </div>
               <p className="text-[11px] text-[#6B705C]">
-                ข้อมูลจะถูกบันทึกและอัปเดตตรงกันทุกคนในทีมแบบ Real-time ทันที
+                Offline & Online สามารถเลือกลักษณะงานร่วมกันได้ทุกรูปแบบอย่างยืดหยุ่น
               </p>
             </div>
           </div>
@@ -197,7 +256,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         </div>
 
         {/* Modal Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[78vh] overflow-y-auto custom-scrollbar">
           
           {/* Title */}
           <div>
@@ -209,28 +268,52 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="เช่น บรีฟ Banner แคมเปญ 9.9, ผลิต Standee หน้าร้าน, ยิง Meta Ads Conversion"
+              placeholder="เช่น บรีฟ Banner 9.9, บูธ Roadshow Central World, ยิง Meta Ads Conversion, ป้าย Standee หน้าร้าน"
               className="w-full px-3.5 py-2.5 bg-white border border-[#D9D0BE] rounded-xl text-sm text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157] focus:ring-1 focus:ring-[#588157]"
             />
           </div>
 
-          {/* Role & Status Row */}
+          {/* Core Roles & Characteristics Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* 1. Primary Responsibility / Department */}
             <div>
-              <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
-                ทีมที่รับผิดชอบ (Role) *
+              <label className="block text-xs font-semibold text-[#3D4034] mb-1.5 flex items-center justify-between">
+                <span>หน้าที่หลัก (Primary Role) *</span>
+                <span className="text-[10px] text-[#6B705C] font-normal">ทีมที่รับผิดชอบหลัก</span>
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as any)}
-                className="w-full px-3 py-2 bg-white border border-[#D9D0BE] rounded-xl text-xs sm:text-sm text-[#3D4034] focus:outline-none focus:border-[#588157]"
+                className="w-full px-3 py-2 bg-white border border-[#D9D0BE] rounded-xl text-xs sm:text-sm text-[#3D4034] font-medium focus:outline-none focus:border-[#588157]"
               >
-                <option value="offline">Offline Team (งานอีเวนต์, สื่อหน้าร้าน, งานพิมพ์)</option>
-                <option value="online">Online Team (แคมเปญ Ads, Content, SEO)</option>
-                <option value="graphic">Graphic Team (บรีฟงาน, Figma/Drive, เวอร์ชันงาน)</option>
+                <option value="offline">🏢 Offline Team (งานพื้นที่, อีเวนต์, หน้าร้าน, สื่อออฟไลน์)</option>
+                <option value="online">🌐 Online Team (ดิจิทัลมาร์เก็ตติ้ง, แคมเปญ Ads, Content, โซเชียล)</option>
+                <option value="graphic">🎨 Graphic Team (ออกแบบกราฟิก, ครีเอทีฟ, ผลิตไฟล์สื่อ)</option>
               </select>
             </div>
 
+            {/* 2. Job Characteristics (Shared across all teams) */}
+            <div>
+              <label className="block text-xs font-semibold text-[#3D4034] mb-1.5 flex items-center justify-between">
+                <span>ลักษณะงาน (Marketing Job Type) *</span>
+                <span className="text-[10px] text-[#588157] font-semibold">เลือกได้ทั้ง 2 ทีม</span>
+              </label>
+              <select
+                value={jobType}
+                onChange={(e) => setJobType(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-[#D9D0BE] rounded-xl text-xs sm:text-sm text-[#3D4034] font-medium focus:outline-none focus:border-[#588157]"
+              >
+                {MARKETING_JOB_TYPES.map(j => (
+                  <option key={j.id} value={j.id}>
+                    {j.icon} {j.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Status & Priority Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
                 สถานะการดำเนินงาน (Status) *
@@ -246,27 +329,137 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <option value="done">Done (เสร็จสมบูรณ์ / Approved)</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
+                ความสำคัญ (Priority) *
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as any)}
+                className="w-full px-3 py-2 bg-white border border-[#D9D0BE] rounded-xl text-xs sm:text-sm text-[#3D4034] focus:outline-none focus:border-[#588157]"
+              >
+                <option value="urgent">⚡ Urgent (ด่วนที่สุด)</option>
+                <option value="high">High (สำคัญมาก)</option>
+                <option value="medium">Medium (ปานกลาง)</option>
+                <option value="low">Low (ปกติ)</option>
+              </select>
+            </div>
           </div>
 
           {/* ===================================================
-              ROLE-SPECIFIC SECTIONS
+              SHARED MARKETING & EXECUTION SPECS (Unified for Offline & Online)
               =================================================== */}
+          <div className="p-4 bg-[#F5F2EA]/90 border border-[#E8E2D2] rounded-2xl space-y-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D2]">
+              <span className="text-xs font-bold text-[#344E41] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#588157]" />
+                รายละเอียดและสเปคของงาน (Channel, KPI, Location & Production Specs)
+              </span>
+              <span className="text-[11px] text-[#6B705C] bg-white px-2 py-0.5 rounded-md border border-[#E8E2D2]">
+                ใช้ได้ทุกทีม
+              </span>
+            </div>
 
-          {/* 1. Graphic Team Specific Fields */}
+            {/* Platform & Target KPI */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-[#3D4034] mb-1 font-semibold flex items-center gap-1">
+                  <Globe className="w-3 h-3 text-[#8C6514]" /> ช่องทาง / สื่อ / แพลตฟอร์ม
+                </label>
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value)}
+                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] focus:outline-none focus:border-[#588157]"
+                >
+                  <option value="Meta Ads">📱 Meta Ads (Facebook & Instagram)</option>
+                  <option value="TikTok Ads">🎵 TikTok Ads / TikTok Shop Live</option>
+                  <option value="Google Ads">🔍 Google Ads (Search, YouTube & PMax)</option>
+                  <option value="Store/Branch">🏪 หน้าร้าน / จุดขายสาขา (Store POSM)</option>
+                  <option value="Event/Venue">🎪 ศูนย์การค้า / สถานที่จัดงาน (Event Hall & Venue)</option>
+                  <option value="Billboard/OOH">🏙️ ป้ายบิลบอร์ด & สื่อนอกบ้าน (OOH / LED / Transit)</option>
+                  <option value="KOL/Influencer">🌟 KOL & Influencer Partnership</option>
+                  <option value="SEO/Blog">📝 SEO / Website Content & Blog</option>
+                  <option value="Email">✉️ LINE OA / CRM / SMS / Email</option>
+                  <option value="Other">📌 อื่นๆ (Other Media Channel)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs text-[#3D4034] mb-1 font-semibold flex items-center gap-1">
+                  <Tag className="w-3 h-3 text-[#588157]" /> เป้าหมาย KPI / ตัวชี้วัดผล
+                </label>
+                <input
+                  type="text"
+                  value={targetKpi}
+                  onChange={(e) => setTargetKpi(e.target.value)}
+                  placeholder="เช่น ROAS > 4.5x, Foot traffic > 8,000 คน, CVR > 3.8%"
+                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
+                />
+              </div>
+            </div>
+
+            {/* Location & Print / Production Specs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-[#3D4034] mb-1 font-semibold flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#588157]" /> สถานที่จัดงาน / จุดติดตั้งสาขา
+                </label>
+                <input
+                  type="text"
+                  value={eventLocation}
+                  onChange={(e) => setEventLocation(e.target.value)}
+                  placeholder="เช่น Central World ชั้น 1 ลาน Beacon, สาขากรุงเทพฯ 25 จุด"
+                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[#3D4034] mb-1 font-semibold flex items-center gap-1">
+                  <Printer className="w-3 h-3 text-[#C85A32]" /> สเปคการผลิต / งานพิมพ์ / วัสดุ
+                </label>
+                <input
+                  type="text"
+                  value={printSpecs}
+                  onChange={(e) => setPrintSpecs(e.target.value)}
+                  placeholder="เช่น PP Board 5mm ไดคัท, Tension Fabric 6x3m, Art Card 260g"
+                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
+                />
+              </div>
+            </div>
+
+            {/* Shared Google Drive Link */}
+            <div>
+              <label className="block text-xs text-[#3D4034] mb-1 font-semibold flex items-center gap-1">
+                <ExternalLink className="w-3 h-3 text-[#588157]" /> ลิงก์โฟลเดอร์ Google Drive / ไฟล์แนบ
+              </label>
+              <input
+                type="url"
+                value={driveUrl}
+                onChange={(e) => setDriveUrl(e.target.value)}
+                placeholder="https://drive.google.com/drive/folders/..."
+                className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
+              />
+            </div>
+          </div>
+
+          {/* ===================================================
+              GRAPHIC TEAM SPECIALIZED FIELDS (Shown if role === 'graphic')
+              =================================================== */}
           {role === 'graphic' && (
             <div className="p-4 bg-[#FDF0EB] border border-[#F5D0C5] rounded-2xl space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-[#F5D0C5]">
                 <span className="text-xs font-bold text-[#C85A32] flex items-center gap-1.5">
                   <Palette className="w-3.5 h-3.5 text-[#E76F51]" />
-                  การจัดการบรีฟ & ไฟล์กราฟิก (Graphic & Creative)
+                  สถานะไฟล์กราฟิก & ลิงก์ Figma (Graphic Master Deliverables)
                 </span>
-                <span className="text-[11px] text-[#C85A32]">Version & Deliverables</span>
+                <span className="text-[11px] text-[#C85A32]">Figma & Versioning</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    สถานะเวอร์ชันงาน (Version)
+                  <label className="block text-xs text-[#3D4034] mb-1 font-semibold">
+                    เวอร์ชันงาน (Version)
                   </label>
                   <input
                     type="text"
@@ -277,8 +470,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    ลิงก์ Figma Design / Master Canvas
+                  <label className="block text-xs text-[#3D4034] mb-1 font-semibold">
+                    ลิงก์ Figma Master File
                   </label>
                   <input
                     type="url"
@@ -291,21 +484,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                  ลิงก์ Google Drive / ไฟล์แนบ Export (.AI, .PSD, .PNG, .PDF)
-                </label>
-                <input
-                  type="url"
-                  value={driveUrl}
-                  onChange={(e) => setDriveUrl(e.target.value)}
-                  placeholder="https://drive.google.com/drive/folders/..."
-                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                  โน้ตผลการตรวจ / ข้อแก้ไขจากทีม (Review & Feedback Notes)
+                <label className="block text-xs text-[#3D4034] mb-1 font-semibold">
+                  โน้ตผลการตรวจ / ฟีดแบ็กจากทีม (Review & Feedback Notes)
                 </label>
                 <textarea
                   rows={2}
@@ -318,106 +498,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           )}
 
-          {/* 2. Offline Team Specific Fields */}
-          {role === 'offline' && (
-            <div className="p-4 bg-[#EDF3EB] border border-[#D0DEC9] rounded-2xl space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#D0DEC9]">
-                <span className="text-xs font-bold text-[#2D5A34] flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#588157]" />
-                  รายละเอียดงาน Offline / อีเวนต์ / สื่อหน้าร้าน
-                </span>
-                <span className="text-[11px] text-[#2D5A34]">POSM & Production</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    สถานที่จัดงาน / จุดติดตั้งสาขา (Location / Branch)
-                  </label>
-                  <input
-                    type="text"
-                    value={eventLocation}
-                    onChange={(e) => setEventLocation(e.target.value)}
-                    placeholder="เช่น Central World ชั้น 1 ลาน Beacon, สาขากรุงเทพฯ 25 จุด"
-                    className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    สเปคงานพิมพ์ / วัสดุการผลิต (Print Specifications)
-                  </label>
-                  <input
-                    type="text"
-                    value={printSpecs}
-                    onChange={(e) => setPrintSpecs(e.target.value)}
-                    placeholder="เช่น PP Board 5mm ไดคัท, Tension Fabric 6x3m, เคลือบด้าน"
-                    className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                  ลิงก์ไฟล์โครงสร้าง / แผนผัง Floor Plan (Drive)
-                </label>
-                <input
-                  type="url"
-                  value={driveUrl}
-                  onChange={(e) => setDriveUrl(e.target.value)}
-                  placeholder="https://drive.google.com/..."
-                  className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 3. Online Team Specific Fields */}
-          {role === 'online' && (
-            <div className="p-4 bg-[#FEF8E7] border border-[#EEDFB4] rounded-2xl space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#EEDFB4]">
-                <span className="text-xs font-bold text-[#8C6514] flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-[#E9C46A]" />
-                  ช่องทาง Online Ads / Content Plan / SEO
-                </span>
-                <span className="text-[11px] text-[#8C6514]">Channel & KPI Goals</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    แพลตฟอร์มโฆษณา / สื่อออนไลน์
-                  </label>
-                  <select
-                    value={platform}
-                    onChange={(e) => setPlatform(e.target.value as any)}
-                    className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] focus:outline-none focus:border-[#588157]"
-                  >
-                    <option value="Meta Ads">Meta Ads (Facebook & IG)</option>
-                    <option value="TikTok Ads">TikTok Ads / TikTok Shop Live</option>
-                    <option value="Google Ads">Google Ads (Search & Performance Max)</option>
-                    <option value="SEO/Blog">SEO / Website Content</option>
-                    <option value="KOL/Influencer">KOL & Influencer Partnership</option>
-                    <option value="Email">Email Marketing & CRM</option>
-                    <option value="Other">Other Channel</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-[#3D4034] mb-1 font-medium">
-                    เป้าหมาย KPI แคมเปญ
-                  </label>
-                  <input
-                    type="text"
-                    value={targetKpi}
-                    onChange={(e) => setTargetKpi(e.target.value)}
-                    placeholder="เช่น ROAS > 4.5x, CVR > 3.8%, 2,000 Orders"
-                    className="w-full px-3 py-1.5 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Description */}
+          {/* Description / Scope */}
           <div>
             <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
               รายละเอียดบรีฟ / สิ่งที่ต้องส่งมอบ (Deliverables & Scope)
@@ -426,13 +507,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="ระบุข้อกำหนดของงาน เช่น ขนาดสัดส่วนชิ้นงาน, จุดประสงค์, กลุ่มเป้าหมาย, ข้อความโปรโมชั่น..."
+              placeholder="ระบุข้อกำหนดของงาน เช่น ขนาดสัดส่วนชิ้นงาน, จุดประสงค์, กลุ่มเป้าหมาย, ข้อความโปรโมชั่น, สิ่งที่ต้องส่งมอบ..."
               className="w-full px-3.5 py-2.5 bg-white border border-[#D9D0BE] rounded-xl text-xs sm:text-sm text-[#3D4034] placeholder-[#A5A58D] focus:outline-none focus:border-[#588157]"
             ></textarea>
           </div>
 
           {/* Assignee & Due Date Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
                 ผู้รับผิดชอบ (Assignee)
@@ -451,22 +532,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 ) : (
                   <option value="ทีมการตลาด">ทีมการตลาด</option>
                 )}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#3D4034] mb-1.5">
-                ความสำคัญ (Priority)
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
-                className="w-full px-3 py-2 bg-white border border-[#D9D0BE] rounded-xl text-xs text-[#3D4034] focus:outline-none focus:border-[#588157]"
-              >
-                <option value="urgent">⚡ Urgent (ด่วนที่สุด)</option>
-                <option value="high">High (สำคัญมาก)</option>
-                <option value="medium">Medium (ปานกลาง)</option>
-                <option value="low">Low (ปกติ)</option>
               </select>
             </div>
 

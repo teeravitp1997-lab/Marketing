@@ -355,7 +355,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
               <thead className="bg-[#F5F2EA] text-[#6B705C] uppercase text-[10px] tracking-wider border-b border-[#E8E2D2]">
                 <tr>
                   <th className="px-4 py-3 font-semibold">ชื่องาน / บรีฟ</th>
-                  <th className="px-3 py-3 font-semibold">ทีม (Role)</th>
+                  <th className="px-3 py-3 font-semibold">หน้าที่หลัก</th>
+                  <th className="px-3 py-3 font-semibold">ลักษณะงาน</th>
                   <th className="px-3 py-3 font-semibold">สถานะ</th>
                   <th className="px-3 py-3 font-semibold">ความสำคัญ</th>
                   <th className="px-3 py-3 font-semibold">ผู้รับผิดชอบ</th>
@@ -373,8 +374,11 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                         <div className="text-[11px] text-[#6B705C] line-clamp-1">{task.description}</div>
                       )}
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       <RoleBadge role={task.role} />
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <JobTypeBadge jobType={task.jobType} label={task.jobTypeLabel} />
                     </td>
                     <td className="px-3 py-3">
                       <select
@@ -405,25 +409,35 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       {task.dueDate || '-'}
                     </td>
                     <td className="px-3 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 max-w-sm">
+                        {task.platform && (
+                          <span className="px-1.5 py-0.5 rounded bg-[#FEF8E7] text-[#8C6514] text-[10px] border border-[#EEDFB4] font-medium">
+                            {task.platform}
+                          </span>
+                        )}
+                        {task.targetKpi && (
+                          <span className="px-1.5 py-0.5 rounded bg-[#EDF3EB] text-[#2D5A34] text-[10px] border border-[#C5DCB7] font-medium truncate max-w-[130px]" title={task.targetKpi}>
+                            🎯 {task.targetKpi}
+                          </span>
+                        )}
+                        {task.eventLocation && (
+                          <span className="px-1.5 py-0.5 rounded bg-[#F5F2EA] text-[#6B705C] text-[10px] border border-[#E8E2D2] truncate max-w-[130px]" title={task.eventLocation}>
+                            📍 {task.eventLocation}
+                          </span>
+                        )}
                         {task.figmaUrl && (
-                          <a href={task.figmaUrl} target="_blank" rel="noreferrer" className="text-[#E76F51] hover:underline flex items-center gap-0.5 font-medium">
-                            Figma <ExternalLink className="w-3 h-3" />
+                          <a href={task.figmaUrl} target="_blank" rel="noreferrer" className="text-[#E76F51] hover:underline flex items-center gap-0.5 font-medium text-[11px]">
+                            Figma <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                         )}
                         {task.driveUrl && (
-                          <a href={task.driveUrl} target="_blank" rel="noreferrer" className="text-[#588157] hover:underline flex items-center gap-0.5 font-medium">
-                            Drive <ExternalLink className="w-3 h-3" />
+                          <a href={task.driveUrl} target="_blank" rel="noreferrer" className="text-[#588157] hover:underline flex items-center gap-0.5 font-medium text-[11px]">
+                            Drive <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                         )}
                         {task.version && (
                           <span className="px-1.5 py-0.5 rounded bg-[#FDF0EB] text-[#C85A32] text-[10px] border border-[#F5D0C5]">
                             {task.version}
-                          </span>
-                        )}
-                        {task.eventLocation && (
-                          <span className="text-[11px] text-[#B8860B] truncate max-w-[120px]">
-                            📍 {task.eventLocation}
                           </span>
                         )}
                       </div>
@@ -463,12 +477,15 @@ const TaskCard: React.FC<{
       onClick={onEdit}
       className="bg-white hover:bg-[#FCFBF8] border border-[#E8E2D2] hover:border-[#D0DEC9] rounded-xl p-3.5 space-y-3 cursor-grab active:cursor-grabbing transition shadow-xs hover:shadow-md group relative"
     >
-      {/* Card Header: Role & Priority */}
-      <div className="flex items-center justify-between gap-2">
-        <RoleBadge role={task.role} />
-        <div className="flex items-center gap-1.5">
-          <PriorityBadge priority={task.priority} />
+      {/* Card Header: Role (หน้าที่หลัก) & Job Type (ลักษณะงาน) & Priority */}
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <RoleBadge role={task.role} />
+          {task.jobType && (
+            <JobTypeBadge jobType={task.jobType} label={task.jobTypeLabel} />
+          )}
         </div>
+        <PriorityBadge priority={task.priority} />
       </div>
 
       {/* Title & Description */}
@@ -483,80 +500,87 @@ const TaskCard: React.FC<{
         )}
       </div>
 
-      {/* Role-Specific Highlights */}
-      
-      {/* 1. Graphic Highlights (Version, Figma, Drive, Review) */}
-      {task.role === 'graphic' && (
-        <div className="p-2 bg-[#FDF0EB] border border-[#F5D0C5] rounded-lg space-y-1.5 text-[11px]">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-[#C85A32]">
-              🏷️ {task.version || 'v1.0 (Draft)'}
-            </span>
-            <div className="flex items-center gap-1.5">
-              {task.figmaUrl && (
-                <a
-                  href={task.figmaUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-1.5 py-0.5 rounded bg-white hover:bg-[#E76F51] text-[#C85A32] hover:text-white transition flex items-center gap-0.5 border border-[#F5D0C5] shadow-xs"
-                  title="เปิดไฟล์ Figma"
-                >
-                  Figma <ExternalLink className="w-2.5 h-2.5" />
-                </a>
+      {/* Unified Marketing Execution Highlights (Shared for all roles) */}
+      {(task.platform || task.targetKpi || task.eventLocation || task.printSpecs || task.figmaUrl || task.driveUrl || task.version) && (
+        <div className="p-2.5 bg-[#F8F6EE] border border-[#E8E2D2] rounded-lg space-y-1.5 text-[11px]">
+          
+          {/* Platform & KPI */}
+          {(task.platform || task.targetKpi) && (
+            <div className="flex items-center justify-between gap-2 flex-wrap text-[11px]">
+              {task.platform && (
+                <span className="font-semibold text-[#8C6514] flex items-center gap-1">
+                  <Globe className="w-3 h-3 text-[#E9C46A]" /> {task.platform}
+                </span>
               )}
-              {task.driveUrl && (
-                <a
-                  href={task.driveUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-1.5 py-0.5 rounded bg-white hover:bg-[#588157] text-[#588157] hover:text-white transition flex items-center gap-0.5 border border-[#C5DCB7] shadow-xs"
-                  title="เปิดโฟลเดอร์ Google Drive"
-                >
-                  Drive <ExternalLink className="w-2.5 h-2.5" />
-                </a>
+              {task.targetKpi && (
+                <span className="text-[10px] text-[#2D5A34] bg-[#EDF3EB] px-1.5 py-0.5 rounded border border-[#C5DCB7] font-medium truncate max-w-[160px]" title={task.targetKpi}>
+                  🎯 {task.targetKpi}
+                </span>
               )}
             </div>
-          </div>
-          {task.reviewNotes && (
-            <p className="text-[10px] text-[#6B705C] line-clamp-1 italic">
-              💬 "{task.reviewNotes}"
-            </p>
           )}
-        </div>
-      )}
 
-      {/* 2. Offline Highlights (Location & Specs) */}
-      {task.role === 'offline' && (task.eventLocation || task.printSpecs) && (
-        <div className="p-2 bg-[#EDF3EB] border border-[#D0DEC9] rounded-lg space-y-1 text-[11px]">
-          {task.eventLocation && (
-            <div className="flex items-center gap-1 text-[#2D5A34] truncate font-medium">
-              <MapPin className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{task.eventLocation}</span>
+          {/* Location & Print Specs */}
+          {(task.eventLocation || task.printSpecs) && (
+            <div className="space-y-0.5 pt-0.5 border-t border-[#E8E2D2]/60">
+              {task.eventLocation && (
+                <div className="flex items-center gap-1 text-[#2D5A34] truncate font-medium text-[10px]">
+                  <MapPin className="w-3 h-3 flex-shrink-0 text-[#588157]" />
+                  <span className="truncate">{task.eventLocation}</span>
+                </div>
+              )}
+              {task.printSpecs && (
+                <p className="text-[10px] text-[#6B705C] truncate">
+                  🖨️ สเปค: {task.printSpecs}
+                </p>
+              )}
             </div>
           )}
-          {task.printSpecs && (
-            <p className="text-[10px] text-[#6B705C] truncate">
-              🖨️ สเปค: {task.printSpecs}
-            </p>
-          )}
-        </div>
-      )}
 
-      {/* 3. Online Highlights (Platform & KPI) */}
-      {task.role === 'online' && (task.platform || task.targetKpi) && (
-        <div className="p-2 bg-[#FEF8E7] border border-[#EEDFB4] rounded-lg space-y-1 text-[11px]">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-[#8C6514] flex items-center gap-1">
-              <Globe className="w-3 h-3" /> {task.platform || 'Online Media'}
-            </span>
-          </div>
-          {task.targetKpi && (
-            <p className="text-[10px] text-[#6B705C] font-medium truncate">
-              🎯 KPI: {task.targetKpi}
-            </p>
+          {/* Graphic & Assets Deliverables */}
+          {(task.figmaUrl || task.driveUrl || task.version || task.reviewNotes) && (
+            <div className="space-y-1 pt-1 border-t border-[#E8E2D2]/60">
+              <div className="flex items-center justify-between gap-1 flex-wrap">
+                {task.version && (
+                  <span className="text-[10px] font-semibold text-[#C85A32] bg-[#FDF0EB] px-1.5 py-0.5 rounded border border-[#F5D0C5]">
+                    🏷️ {task.version}
+                  </span>
+                )}
+                <div className="flex items-center gap-1.5 ml-auto">
+                  {task.figmaUrl && (
+                    <a
+                      href={task.figmaUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-1.5 py-0.5 rounded bg-white hover:bg-[#E76F51] text-[#C85A32] hover:text-white transition flex items-center gap-0.5 border border-[#F5D0C5] text-[10px] shadow-xs"
+                      title="เปิดไฟล์ Figma"
+                    >
+                      Figma <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                  {task.driveUrl && (
+                    <a
+                      href={task.driveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-1.5 py-0.5 rounded bg-white hover:bg-[#588157] text-[#588157] hover:text-white transition flex items-center gap-0.5 border border-[#C5DCB7] text-[10px] shadow-xs"
+                      title="เปิดโฟลเดอร์ Google Drive"
+                    >
+                      Drive <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+              {task.reviewNotes && (
+                <p className="text-[10px] text-[#6B705C] line-clamp-1 italic">
+                  💬 "{task.reviewNotes}"
+                </p>
+              )}
+            </div>
           )}
+
         </div>
       )}
 
@@ -604,25 +628,52 @@ const TaskCard: React.FC<{
   );
 };
 
-// Helper Badges
+// Helper Badge: Role (หน้าที่หลัก)
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
   if (role === 'offline') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EDF3EB] text-[#2D5A34] border border-[#C5DCB7]">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#EDF3EB] text-[#2D5A34] border border-[#C5DCB7]">
         <span className="w-1.5 h-1.5 rounded-full bg-[#588157]"></span> Offline
       </span>
     );
   }
   if (role === 'online') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#FEF8E7] text-[#8C6514] border border-[#EEDFB4]">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF8E7] text-[#8C6514] border border-[#EEDFB4]">
         <span className="w-1.5 h-1.5 rounded-full bg-[#E9C46A]"></span> Online
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#FDF0EB] text-[#C85A32] border border-[#F5D0C5]">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FDF0EB] text-[#C85A32] border border-[#F5D0C5]">
       <span className="w-1.5 h-1.5 rounded-full bg-[#E76F51]"></span> Graphic
+    </span>
+  );
+};
+
+// Helper Badge: Job Characteristic (ลักษณะงาน)
+const JobTypeBadge: React.FC<{ jobType?: string; label?: string }> = ({ jobType, label }) => {
+  if (!jobType) return null;
+
+  const jobTypeMap: Record<string, { label: string; icon: string; style: string }> = {
+    posm_print: { label: 'POSM / งานพิมพ์', icon: '🖨️', style: 'bg-[#F4F1EA] text-[#555B46] border-[#DDD5C5]' },
+    event_booth: { label: 'อีเวนต์ & บูธ', icon: '🎪', style: 'bg-[#EDF3EB] text-[#2D5A34] border-[#C5DCB7]' },
+    digital_ads: { label: 'โฆษณา Ads', icon: '📱', style: 'bg-[#FEF8E7] text-[#8C6514] border-[#EEDFB4]' },
+    kol_influencer: { label: 'KOL & PR', icon: '🌟', style: 'bg-[#FDF0EB] text-[#C85A32] border-[#F5D0C5]' },
+    content_social: { label: 'Content & Social', icon: '✍️', style: 'bg-[#EEF4F8] text-[#2A5C7A] border-[#C8DFEE]' },
+    live_commerce: { label: 'Live Streaming', icon: '🔴', style: 'bg-[#FDECEE] text-[#B02A37] border-[#F8CCD1]' },
+    ooh_billboard: { label: 'ป้าย OOH', icon: '🏙️', style: 'bg-[#F1EEF8] text-[#563D7C] border-[#DCD5EE]' },
+    promotion_crm: { label: 'โปรโมชั่น & CRM', icon: '🎁', style: 'bg-[#FEF6E8] text-[#9A6400] border-[#F5DCB1]' },
+    omnichannel: { label: 'Omnichannel O2O', icon: '🔄', style: 'bg-[#EBF7F2] text-[#1E7253] border-[#BEE7D5]' },
+    other: { label: 'อื่นๆ', icon: '📌', style: 'bg-[#F5F2EA] text-[#6B705C] border-[#E8E2D2]' },
+  };
+
+  const info = jobTypeMap[jobType] || { label: label || jobType, icon: '📌', style: 'bg-[#F5F2EA] text-[#6B705C] border-[#E8E2D2]' };
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${info.style}`} title={label || info.label}>
+      <span>{info.icon}</span>
+      <span className="truncate max-w-[100px]">{info.label}</span>
     </span>
   );
 };

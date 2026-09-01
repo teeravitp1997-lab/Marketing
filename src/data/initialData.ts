@@ -90,12 +90,14 @@ export const INITIAL_MEMBERS: TeamMember[] = [
 
 
 export const INITIAL_TASKS: TaskItem[] = [
-  // Offline Team Tasks
+  // Offline Team Tasks (with flexible job types)
   {
     id: 'task-off-1',
     title: 'ผลิตและติดตั้งป้าย Standee หน้าร้าน 25 สาขา',
     description: 'จัดพิมพ์ Standee ไดคัทขนาด 80x180 cm สำหรับโปรโมชั่น 9.9 และติดตั้งที่สาขาหลัก',
     role: 'offline',
+    jobType: 'posm_print',
+    jobTypeLabel: 'สื่อหน้าร้าน & งานพิมพ์ (POSM)',
     status: 'in_progress',
     priority: 'high',
     assignee: {
@@ -109,6 +111,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     tags: ['POSM', 'หน้าร้าน', 'งานพิมพ์'],
     printSpecs: 'PP Board 5mm + ด้านกาว สเปคกันน้ำ เคลือบด้าน',
     eventLocation: 'สาขากรุงเทพฯ และปริมณฑล (25 จุด)',
+    platform: 'Store/Branch',
+    targetKpi: 'ติดตั้งครบ 100% ภายใน 5 ก.ย.',
     createdAt: Date.now() - 3600000 * 48,
     updatedAt: Date.now() - 3600000 * 4,
     updatedBy: 'กานต์ (Offline Lead)',
@@ -118,6 +122,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'ประสานงานบูธกิจกรรม Event Launch ณ Central World',
     description: 'จองพื้นที่จัดบูธ 6x6 เมตร, ออกแบบโครงสร้าง Backdrop, แสง สี เสียง และเจ้าหน้าที่ MC',
     role: 'offline',
+    jobType: 'event_booth',
+    jobTypeLabel: 'งานอีเวนต์ & บูธกิจกรรม',
     status: 'review',
     priority: 'urgent',
     assignee: {
@@ -131,6 +137,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     tags: ['Event', 'CentralWorld', 'โครงสร้าง'],
     eventLocation: 'Central World ชั้น 1 ลาน Beacon',
     printSpecs: 'Backdrop ผ้า Tension Fabric 6x3m + เวทีเตี้ย',
+    platform: 'Event/Venue',
+    targetKpi: 'Foot Traffic > 8,000 คน, Lead Gen 1,200 รายชื่อ',
     createdAt: Date.now() - 3600000 * 72,
     updatedAt: Date.now() - 3600000 * 12,
     updatedBy: 'พลอย (Event Co.)',
@@ -140,6 +148,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'แจก Premium Giftset และโบชัวร์โปรโมชั่นหน้าร้าน',
     description: 'จัดเตรียมกระเป๋าผ้าพร้อมของที่ระลึก 500 ชุด แจกลูกค้า VIP ที่ซื้อครบ 2,500 บาท',
     role: 'offline',
+    jobType: 'promotion_crm',
+    jobTypeLabel: 'โปรโมชั่น & ของพรีเมียม',
     status: 'todo',
     priority: 'medium',
     assignee: {
@@ -151,17 +161,21 @@ export const INITIAL_TASKS: TaskItem[] = [
     budget: 35000,
     spent: 0,
     tags: ['Premium Gift', 'VIP', 'Brochure'],
+    platform: 'Store/Branch',
+    targetKpi: 'แจกครบ 500 ชุด กระตุ้น Basket Size +35%',
     createdAt: Date.now() - 3600000 * 24,
     updatedAt: Date.now() - 3600000 * 24,
     updatedBy: 'กานต์ (Offline Lead)',
   },
 
-  // Online Team Tasks
+  // Online Team Tasks (can also configure event/production aspects)
   {
     id: 'task-on-1',
     title: 'แคมเปญ Meta Ads (Facebook & Instagram) ทราฟฟิก 9.9 Flash Sale',
     description: 'ยิงโฆษณา Conversion + Catalog Sales เจาะกลุ่ม Custom Audience และ Lookalike 1-2%',
     role: 'online',
+    jobType: 'digital_ads',
+    jobTypeLabel: 'สื่อโฆษณาออนไลน์ (Meta Ads)',
     status: 'in_progress',
     priority: 'urgent',
     assignee: {
@@ -184,6 +198,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'TikTok Shop Livestream Campaign & Short Video Boost',
     description: 'จ้าง 5 TikTok Creators ปักตะกร้า และยิง Spark Ads ดันยอดไลฟ์สดช่วงเที่ยงคืน 9.9',
     role: 'online',
+    jobType: 'live_commerce',
+    jobTypeLabel: 'ไลฟ์สด & Live Streaming',
     status: 'todo',
     priority: 'high',
     assignee: {
@@ -206,6 +222,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'SEO Article: 10 ไอเทมเด็ดคุ้มที่สุดในโปรโมชั่นไตรมาส 3',
     description: 'เขียนบทความลงเว็บไซต์หลัก เน้น Organic Keywords สำคัญ และทำ Internal Linking เข้าหน้าสินค้า',
     role: 'online',
+    jobType: 'content_social',
+    jobTypeLabel: 'คอนเทนต์ & SEO Website',
     status: 'done',
     priority: 'low',
     assignee: {
@@ -230,6 +248,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'บรีฟกราฟิก Banner ชุด 9.9 Super Sale (10 Sizes)',
     description: 'ออกแบบ Key Visual สไตล์ไฮป์สะดุดตา โทนสี Electric Orange & Neon Purple สำหรับ Ads และเว็บ',
     role: 'graphic',
+    jobType: 'digital_ads',
+    jobTypeLabel: 'Key Visual & Banner Ads',
     status: 'review',
     priority: 'urgent',
     assignee: {
@@ -254,6 +274,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'Motion Graphic Teaser 15s สำหรับสตอรี่ IG / TikTok',
     description: 'ทำวิดีโออนิเมชันเปิดตัวแคมเปญ 15 วินาที พร้อมเสียง Sound Effect จังหวะเร้าใจ',
     role: 'graphic',
+    jobType: 'content_social',
+    jobTypeLabel: 'Motion Video & TikTok Teaser',
     status: 'in_progress',
     priority: 'high',
     assignee: {
@@ -278,6 +300,8 @@ export const INITIAL_TASKS: TaskItem[] = [
     title: 'ออกแบบ Art Artwork โบชัวร์พับ 3 ตอน และคูปองท้ายบิล',
     description: 'จัดทำไฟล์ Artwork พร้อมส่งโรงพิมพ์ สำหรับแจกสาขาและแนบในพัสดุออนไลน์',
     role: 'graphic',
+    jobType: 'posm_print',
+    jobTypeLabel: 'Artwork ส่งพิมพ์ & โบชัวร์',
     status: 'done',
     priority: 'medium',
     assignee: {
@@ -289,6 +313,7 @@ export const INITIAL_TASKS: TaskItem[] = [
     budget: 15000,
     spent: 15000,
     tags: ['Artwork ส่งพิมพ์', 'Brochure', 'CMYK'],
+    printSpecs: 'Art Card 260g เคลือบด้าน ไดคัทพับ 3 ตอน',
     version: 'vFinal (ส่งโรงพิมพ์เรียบร้อย)',
     driveUrl: 'https://drive.google.com/drive/folders/print-ready-cmyk-files',
     reviewNotes: 'ตรวจปรู๊ฟสีเรียบร้อย ตัดตก 3mm ครบถ้วน',
